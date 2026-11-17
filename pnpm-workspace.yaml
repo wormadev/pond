@@ -1,6 +1,7 @@
 packages:
   - "apps/*"
   - "packages/*"
+  - "!apps/connect"
 
 # Single source of truth for versions shared across the workspace. Reference
 # with the `catalog:` protocol in each package.json to prevent version drift.

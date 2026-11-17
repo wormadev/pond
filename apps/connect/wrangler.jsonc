@@ -1,0 +1,33 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "pond-connect",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-10-13",
+  "routes": [{ "pattern": "ponds.worma.dev", "custom_domain": true }],
+  "workers_dev": false,
+  "observability": { "enabled": true },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "pond-connect",
+      "database_id": "f8d66259-5bd2-45f7-84e3-ebd08c67b7a0",
+      "migrations_dir": "migrations"
+    }
+  ],
+  "durable_objects": {
+    "bindings": [{ "name": "RELAY", "class_name": "Relay" }]
+  },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["Relay"] }],
+  "ratelimits": [
+    {
+      "name": "AUTH_LIMIT",
+      "namespace_id": "4161",
+      "simple": { "limit": 10, "period": 60 }
+    },
+    {
+      "name": "RELAY_LIMIT",
+      "namespace_id": "4162",
+      "simple": { "limit": 1200, "period": 60 }
+    }
+  ]
+}
