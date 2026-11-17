@@ -23,6 +23,10 @@ const ROUTES: ReadonlyArray<
     /^\/saves\/(tags|folders|trash|restore|note|rating|favorite)$/,
     "write",
   ],
+  ["GET", /^\/library\/recent$/, "manage"],
+  ["POST", /^\/library\/switch$/, "manage"],
+  ["GET", /^\/operations$/, "manage"],
+  ["POST", /^\/operations\/(preview|run)$/, "manage"],
 ];
 
 /** Unlisted routes stay limited to the Local API Token, so new routes are private until they're added here. */

@@ -22,7 +22,7 @@ export const queryOperationAccess = {
   "agent.mcpClients": "hidden",
   "agent.mcpSnippet": "read",
   "agent.messages": "read",
-  "agent.newChat": "hidden",
+  "agent.newChat": "review",
   "agent.openMcpInstall": "hidden",
   "agent.pickAttachments": "hidden",
   "agent.removeKey": "review",

@@ -32,6 +32,13 @@ const ACCESS = [
       "POST /saves/tags, /saves/folders, /saves/trash, /saves/restore, /saves/note, /saves/rating, /saves/favorite",
     ],
   },
+  {
+    name: "Manage Library",
+    routes: [
+      "GET /library/recent, POST /library/switch",
+      "GET /operations, POST /operations/preview, /operations/run",
+    ],
+  },
 ];
 
 const TOOLS = [

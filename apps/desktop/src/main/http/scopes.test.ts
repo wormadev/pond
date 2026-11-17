@@ -20,15 +20,19 @@ describe("routeAccess", () => {
     ["POST", "/api/v2/saves/trash", "write"],
     ["POST", "/api/v2/saves/rating", "write"],
     ["POST", "/api/v2/saves/favorite", "write"],
+    ["GET", "/api/v2/library/recent", "manage"],
+    ["POST", "/api/v2/library/switch", "manage"],
+    ["GET", "/api/v2/operations", "manage"],
+    ["POST", "/api/v2/operations/preview", "manage"],
+    ["POST", "/api/v2/operations/run", "manage"],
   ])("%s %s needs %s", (method, path, access) => {
     expect(routeAccess(method, path)).toBe(access);
   });
 
   it.each([
-    ["GET", "/api/v2/library/recent"],
-    ["POST", "/api/v2/library/switch"],
-    ["GET", "/api/v2/operations"],
-    ["POST", "/api/v2/operations/run"],
+    ["GET", "/api/v2/library/switch"],
+    ["POST", "/api/v2/operations"],
+    ["GET", "/api/v2/operations/run"],
     ["POST", "/api/v2/session/import"],
     ["GET", "/api/v2/session/pending"],
     ["POST", "/api/v2/library/info"],

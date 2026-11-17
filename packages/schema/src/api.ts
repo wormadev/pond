@@ -61,7 +61,12 @@ export const ApiAppInfoSchema = z.object({
   mcp: z.object({ command: z.string(), args: z.array(z.string()) }).optional(),
 });
 
-export const API_TOKEN_SCOPES = ["search", "export", "write"] as const;
+export const API_TOKEN_SCOPES = [
+  "search",
+  "export",
+  "write",
+  "manage",
+] as const;
 export const ApiTokenScopeSchema = z.enum(API_TOKEN_SCOPES);
 export type ApiTokenScope = z.infer<typeof ApiTokenScopeSchema>;
 
@@ -69,6 +74,7 @@ export const API_TOKEN_SCOPE_LABELS = {
   search: "Search Saves",
   export: "Export Files",
   write: "Add and Edit Saves",
+  manage: "Manage Library",
 } satisfies Record<ApiTokenScope, string>;
 
 export const ApiTokenInfoSchema = z.object({

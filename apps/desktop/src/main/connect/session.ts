@@ -112,8 +112,13 @@ async function readSession(): Promise<Session | null> {
 
 /** The relay reaches Pond with its own scoped token, so a phone never gets the routes reserved for the Local API Token. */
 async function withApiToken(session: Session): Promise<Session> {
-  const tokens = await apiTokens.list();
-  if (tokens.some((token) => token.id === session.apiTokenId)) return session;
+  const current = (await apiTokens.list()).find(
+    (token) => token.id === session.apiTokenId,
+  );
+  if (current && API_TOKEN_SCOPES.every((s) => current.scopes.includes(s)))
+    return session;
+  /** A token from before a scope was added is replaced, so the phone gains it without signing in again. */
+  if (current) await apiTokens.revoke(current.id);
   const created = await apiTokens.create("Pond Connect", API_TOKEN_SCOPES);
   const next = {
     ...session,

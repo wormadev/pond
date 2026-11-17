@@ -35,11 +35,10 @@ Each scoped token has one or more of these. A request outside them gets `forbidd
 | Search Saves | `GET /library/info`, `/library/tags`, `/library/folders`, `/library/views`, `/library/sources`. `POST /library/query`, `/library/search`. `/saves/get`, `GET /saves/info`, `/saves/text`, `/saves/status`, `/saves/thumb`, `/saves/file`, `/saves/related`. |
 | Export Files | Every `/library/conversion` route. |
 | Add and Edit Saves | `POST /enqueue`, `/saves/tags`, `/saves/folders`, `/saves/trash`, `/saves/restore`, `/saves/note`, `/saves/rating`, `/saves/favorite`. |
+| Manage Library | `GET /library/recent`, `POST /library/switch`. `GET /operations`, `POST /operations/preview`, `/operations/run`. Operations reach nearly every action in the app, so grant this only to tools you trust with the whole Library. |
 
 These routes are private. Only the Local API Token reaches them, and they may change between minor versions:
 
-- `/operations`, which reaches nearly every action in the app.
-- `/library/recent` and `/library/switch`.
 - `/session/*`, which the browser extension uses to hand Pond a signed-in session.
 
 ## Responses

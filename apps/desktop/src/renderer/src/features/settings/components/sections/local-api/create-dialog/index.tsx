@@ -13,6 +13,8 @@ const SCOPE_DESCRIPTIONS = {
   export: "Let connected apps export converted copies and compress images.",
   write:
     "Let connected apps add saves, edit tags, folders, notes, and ratings, and use Trash.",
+  manage:
+    "Let connected apps switch Libraries and run nearly any action in Pond, including the Assistant.",
 } satisfies Record<ApiTokenScope, string>;
 
 interface CreateTokenDialogProps {
