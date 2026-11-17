@@ -5,9 +5,9 @@ iPhone client for Pond, living in this fork at `apps/ios`. Upstream: https://git
 ## How it reaches Pond
 
 - Pond's HTTP API listens on loopback only (`127.0.0.1:41610/api/v2`). The Mac exposes it to the tailnet with `tailscale serve --bg --https=41610 http://127.0.0.1:41610`.
-- The app stores the address in the App Group defaults and a scoped Pond token (Search Saves + Add and Edit Saves) in the shared Keychain group. Never hardcode either.
+- The app stores the address in the App Group defaults and a scoped Pond token (Search Saves, Add and Edit Saves; Export Files for image tools; Manage Library for Libraries, Tags, Sources, Inbox and Assistant, which go through `/operations`) in the shared Keychain group. Never hardcode either.
 - Only works while the Mac is on, Pond is open, and the phone is on Tailscale. Planned next: account login in Pond desktop plus a Cloudflare Tunnel from the Mac (decision T-1), so Tailscale isn't needed. The account service stores accounts and Mac links only, never Saves or media.
-- API reference: `docs/api.md` in the Pond repo. Only the scoped-token routes are used; private routes (`/operations`, `/session`) are off limits.
+- API reference: `docs/api.md` in the Pond repo. Only the scoped-token routes are used; `/session` is off limits.
 
 ## Known API limits
 

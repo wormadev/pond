@@ -168,7 +168,11 @@ extension Error {
     /// What went wrong and what to do about it, in words the person can act on.
     var pondMessage: String {
         if let error = self as? PondError {
-            return error.code == "unauthorized" ? "Pond turned down this token. Disconnect in Settings and connect again with a new one." : error.message
+            switch error.code {
+            case "unauthorized": return "Pond turned down this token. Disconnect in Settings and connect again with a new one."
+            case "forbidden": return "This token can't do that. In Pond on your Mac, open Settings, Local API, and give it the access it needs."
+            default: return error.message
+            }
         }
         if self is URLError {
             return "Check that your Mac is on, Pond is open, and this phone can reach it."

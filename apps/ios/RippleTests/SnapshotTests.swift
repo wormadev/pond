@@ -59,6 +59,35 @@ struct SnapshotTests {
         try await render("Downloads-\(name)", mode) { DownloadsScreen(store: $0) }
     }
 
+    @Test(arguments: [("full", FixtureProtocol.Mode.full), ("worst", .worst), ("failed", .failed)])
+    func libraries(_ name: String, _ mode: FixtureProtocol.Mode) async throws {
+        try await render("Libraries-\(name)", mode) { LibrariesScreen(store: $0) }
+    }
+
+    @Test(arguments: [("full", FixtureProtocol.Mode.full), ("worst", .worst), ("empty", .empty)])
+    func tags(_ name: String, _ mode: FixtureProtocol.Mode) async throws {
+        try await render("Tags-\(name)", mode) { store in
+            TagsScreen(store: store).task { await store.refreshSidebar() }
+        }
+    }
+
+    @Test(arguments: [("full", FixtureProtocol.Mode.full), ("worst", .worst), ("empty", .empty), ("failed", .failed)])
+    func sources(_ name: String, _ mode: FixtureProtocol.Mode) async throws {
+        try await render("Sources-\(name)", mode) { SourcesScreen(store: $0) }
+    }
+
+    @Test(arguments: [("full", FixtureProtocol.Mode.full), ("worst", .worst), ("empty", .empty), ("failed", .failed)])
+    func assistant(_ name: String, _ mode: FixtureProtocol.Mode) async throws {
+        try await render("Assistant-\(name)", mode) { AssistantScreen(store: $0) }
+    }
+
+    @Test(arguments: [("full", FixtureProtocol.Mode.full), ("worst", .worst)])
+    func chat(_ name: String, _ mode: FixtureProtocol.Mode) async throws {
+        try await render("Chat-\(name)", mode) { store in
+            ChatScreen(api: store.api, chat: AssistantChat(id: "c1", title: "Design references"))
+        }
+    }
+
     @Test func connect() async throws {
         try await render("Connect", .full) { _ in ConnectScreen { _ in } }
     }

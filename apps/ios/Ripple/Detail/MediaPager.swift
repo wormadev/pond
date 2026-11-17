@@ -8,6 +8,8 @@ struct MediaPager: View {
     var isCurrent = true
     let width: CGFloat
     let maxHeight: CGFloat
+    /// The file index on screen, so image tools act on the page being viewed.
+    @Binding var page: Int
 
     @State private var zoomed: SaveFile?
     @State private var playsEmbed = false
@@ -17,7 +19,9 @@ struct MediaPager: View {
     }
 
     /// The post's own media. Pond also stores a poster, a card thumbnail and the author's avatar.
-    private var media: [SaveFile] {
+    private var media: [SaveFile] { Self.media(in: files) }
+
+    static func media(in files: [SaveFile]) -> [SaveFile] {
         let originals = files.filter { $0.name.hasPrefix("media-") && !$0.name.contains("_thumbnail") }
         return originals.isEmpty ? files.filter { $0.name.hasPrefix("poster-") } : originals
     }
@@ -69,9 +73,9 @@ struct MediaPager: View {
         } else if media.count == 1 {
             page(media[0])
         } else {
-            TabView {
+            TabView(selection: $page) {
                 ForEach(media) { file in
-                    page(file)
+                    page(file).tag(file.index)
                 }
             }
             .tabViewStyle(.page(indexDisplayMode: .always))

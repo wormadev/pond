@@ -24,6 +24,14 @@ final class SavesList {
         self.scope = scope
     }
 
+    /// A list that already holds its Saves and has no further pages, such as related Saves.
+    init(api: PondAPI, saves: [Save]) {
+        self.api = api
+        self.scope = .all
+        self.saves = saves
+        self.total = saves.count
+    }
+
     var reloadKey: [String] { [keywords, String(semantic), String(newestFirst)] }
 
     func reload() async {

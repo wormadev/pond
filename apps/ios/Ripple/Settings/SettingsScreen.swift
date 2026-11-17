@@ -39,6 +39,21 @@ private struct LibraryGroup: View {
                     showsChevron: true)
         }
         .buttonStyle(RowPressStyle())
+        RowSeparator()
+        NavigationLink { LibrariesScreen(store: store) } label: {
+            ListRow(title: "Libraries", icon: "books.vertical", value: store.info?.name, showsChevron: true)
+        }
+        .buttonStyle(RowPressStyle())
+        RowSeparator()
+        NavigationLink { TagsScreen(store: store) } label: {
+            ListRow(title: "Tags", icon: "tag", value: store.tags.count.formatted(), showsChevron: true)
+        }
+        .buttonStyle(RowPressStyle())
+        RowSeparator()
+        NavigationLink { SourcesScreen(store: store) } label: {
+            ListRow(title: "Sources", icon: "arrow.triangle.2.circlepath", showsChevron: true)
+        }
+        .buttonStyle(RowPressStyle())
         let pending = PendingSaves.urls.count
         if pending > 0 {
             RowSeparator()

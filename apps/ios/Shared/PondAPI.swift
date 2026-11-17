@@ -49,8 +49,9 @@ struct PondAPI {
         try await send(request(path, query: query))
     }
 
-    private func post<T: Decodable>(_ path: String, _ body: some Encodable) async throws -> T {
+    private func post<T: Decodable>(_ path: String, _ body: some Encodable, timeout: TimeInterval? = nil) async throws -> T {
         var request = request(path)
+        if let timeout { request.timeoutInterval = timeout }
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.httpBody = try JSONEncoder().encode(body)
@@ -78,6 +79,10 @@ struct PondAPI {
 
     func text(id: String) async throws -> SaveText {
         try await get("/saves/text", query: [.init(name: "id", value: id)])
+    }
+
+    func related(id: String) async throws -> [Save] {
+        try await get("/saves/related", query: [.init(name: "id", value: id), .init(name: "limit", value: "12")])
     }
 
     func thumbRequest(id: String, size: String) -> URLRequest {
@@ -120,6 +125,7 @@ struct PondAPI {
         var add: [String]?
         var remove: [String]?
         var rating: Int?
+        var favorite: Bool?
     }
 
     private struct NoteEdit: Encodable {
@@ -147,6 +153,10 @@ struct PondAPI {
         let _: EditResult = try await post("/saves/rating", IdsEdit(ids: [id], rating: rating))
     }
 
+    func setFavorite(id: String, favorite: Bool) async throws {
+        let _: EditResult = try await post("/saves/favorite", IdsEdit(ids: [id], favorite: favorite))
+    }
+
     func setNote(id: String, note: String?) async throws {
         let _: EditResult = try await post("/saves/note", NoteEdit(id: id, note: note))
     }
@@ -157,5 +167,53 @@ struct PondAPI {
 
     func restore(id: String) async throws {
         let _: EditResult = try await post("/saves/restore", IdsEdit(ids: [id]))
+    }
+
+    private struct CompressRequest: Encodable {
+        var ids: [String]
+        var fileIndex: Int
+        var mode: String
+        var quality = 85
+    }
+
+    /// Needs a token with the Export scope. The Mac rewrites the file in place.
+    func compress(id: String, fileIndex: Int, mode: String) async throws -> ConversionJob {
+        try await post("/library/conversion/compress", CompressRequest(ids: [id], fileIndex: fileIndex, mode: mode))
+    }
+
+    func conversion(id: String) async throws -> ConversionJob {
+        try await get("/library/conversion/\(id)")
+    }
+
+    func recentLibraries() async throws -> [RecentLibrary] { try await get("/library/recent") }
+
+    /// Pond relaunches on the Mac into the chosen Library, so the connection drops for a moment.
+    func switchLibrary(path: String) async throws {
+        let _: JSONValue = try await post("/library/switch", ["path": path])
+    }
+
+    private struct OperationRequest: Encodable {
+        var operation: String
+        var arguments: [String: JSONValue]
+        var token: String?
+    }
+
+    private struct OperationPreview: Decodable {
+        var token: String
+    }
+
+    /// Runs one of Pond's operations. Ones Pond marks for review need a preview token first; the phone's own confirmation is the review.
+    func operation<T: Decodable>(
+        _ name: String,
+        _ arguments: [String: JSONValue] = [:],
+        review: Bool = false,
+        timeout: TimeInterval? = nil
+    ) async throws -> T {
+        var body = OperationRequest(operation: name, arguments: arguments)
+        if review {
+            let preview: OperationPreview = try await post("/operations/preview", body)
+            body.token = preview.token
+        }
+        return try await post("/operations/run", body, timeout: timeout)
     }
 }

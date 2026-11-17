@@ -30,3 +30,17 @@
 - [ ] Fork build signs with a different team: Safari and Share extensions use the upstream app group and won't load
 - [x] Tests for the account service (`bunx vitest run` in `apps/connect`)
 - [ ] Password reset and email verification
+
+## Desktop parity (2026-11-17)
+- [x] Favorite toggle on detail
+- [x] Related saves strip on detail
+- [x] Image tools (WebP, lossless, quality 85, remove background, upscale) via conversion API; needs Export scope
+- [x] Desktop: `manage` token scope for `/library/recent`, `/library/switch`, `/operations/*`
+- [x] Library switcher (Settings)
+- [x] Operations client (preview then run) in `PondAPI`
+- [x] Tag manager: rename, merge, delete tags (tags.* operations)
+- [x] Sources: overview, sync history, pause/resume (sources.overview, sync.runs, queue.source.*); adding a source has no operation
+- [x] Inbox and snooze: Inbox scope, mark processed, snooze (saves.bulkEdit)
+- [x] Assistant: chats, messages, send (agent.* operations)
+- [ ] End-to-end check of all of the above against the fork build of Pond (simulator snapshots only so far)
+- [ ] Search field missing on user's device: works on iOS 26.4 simulator; need device iOS version and build

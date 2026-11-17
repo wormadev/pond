@@ -30,11 +30,26 @@ final class FixtureProtocol: URLProtocol {
         if path == "/saves/thumb" {
             let id = URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems?.first { $0.name == "id" }?.value ?? ""
             id == "broken" ? respond(404, Data(), "text/plain") : respond(200, Fixtures.thumbnail(for: id), "image/png")
-        } else if let data = Fixtures.body(path, mode: mode) {
+        } else if let data = Fixtures.body(path, mode: mode, operation: operationName) {
             respond(200, data, "application/json")
         } else {
             respond(422, Data(#"{"status":"error","error":{"code":"invalid","message":"No such file."}}"#.utf8), "application/json")
         }
+    }
+
+    /// URLProtocol sees a POST body only as a stream.
+    private var operationName: String? {
+        guard let stream = request.httpBodyStream else { return nil }
+        stream.open()
+        defer { stream.close() }
+        var data = Data()
+        var buffer = [UInt8](repeating: 0, count: 4096)
+        while stream.hasBytesAvailable {
+            let read = stream.read(&buffer, maxLength: buffer.count)
+            guard read > 0 else { break }
+            data.append(buffer, count: read)
+        }
+        return (try? JSONSerialization.jsonObject(with: data) as? [String: Any])?["operation"] as? String
     }
 
     private func respond(_ status: Int, _ data: Data, _ type: String) {
@@ -46,7 +61,7 @@ final class FixtureProtocol: URLProtocol {
 }
 
 enum Fixtures {
-    static func body(_ path: String, mode: FixtureProtocol.Mode) -> Data? {
+    static func body(_ path: String, mode: FixtureProtocol.Mode, operation: String? = nil) -> Data? {
         let worst = mode == .worst
         let empty = mode == .empty
         let data: Any
@@ -70,6 +85,18 @@ enum Fixtures {
         case "/library/query", "/library/search":
             let saves = empty ? [] : worst ? worstSaves : fullSaves
             data = ["saves": saves, "total": empty ? 0 : worst ? 1284 : 1168, "nextCursor": NSNull()]
+        case "/saves/related":
+            data = empty ? [] : Array((worst ? worstSaves : fullSaves).prefix(8))
+        case "/library/recent":
+            data = [
+                ["path": "/Users/me/Pond", "name": worst ? "Abdulaziz's Very Long Personal Research Library" : "My Pond", "available": true, "active": true, "lastOpened": 0, "icon": NSNull(), "accent": NSNull()],
+                ["path": "/Volumes/Archive/Design.pond", "name": "Design", "available": !worst, "active": false, "lastOpened": 0, "icon": NSNull(), "accent": NSNull()],
+            ]
+        case "/operations/preview":
+            data = ["token": "fixture", "operation": operation ?? "", "libraryId": "fixture", "expiresAt": 0]
+        case "/operations/run":
+            guard let operation, let result = operationResult(operation, mode: mode) else { return nil }
+            data = result
         case "/saves/info":
             data = (worst ? worstSaves : fullSaves)[0]
         case "/saves/text":
@@ -78,6 +105,42 @@ enum Fixtures {
             return nil
         }
         return try? JSONSerialization.data(withJSONObject: ["status": "success", "data": data])
+    }
+
+    private static func source(_ id: String, _ source: String, _ handle: String, label: String? = nil, paused: Bool = false, error: String? = nil, syncing: Bool = false) -> [String: Any] {
+        var sync: [String: Any] = ["lastSyncedAt": "2026-11-17T08:00:00.000Z", "paused": paused]
+        sync["lastError"] = error
+        var row: [String: Any] = ["id": id, "source": source, "handle": handle, "syncing": syncing, "connected": true, "sync": sync]
+        row["label"] = label
+        return row
+    }
+
+    private static func operationResult(_ name: String, mode: FixtureProtocol.Mode) -> Any? {
+        let worst = mode == .worst
+        let empty = mode == .empty
+        switch name {
+        case "accounts.list":
+            return ["accounts": empty ? [] : [
+                source("a1", "instagram", worst ? "averyveryverylongunbreakablehandlewithoutanyspaces" : "wormadev", syncing: worst),
+                source("a2", "twitter", "wormadev", error: worst ? "Sign in again" : nil),
+            ]]
+        case "watches.list":
+            return ["watches": empty ? [] : [source("w1", "youtube", "domestika", label: worst ? "Domestika: online courses for creatives, the long channel name" : "Domestika", paused: true)]]
+        case "agent.chats":
+            return empty ? [] : [
+                ["id": "c1", "title": worst ? "Find every interior design reel I saved last spring and group them by room" : "Design references", "updatedAt": "2026-11-17T08:00:00.000Z", "fishId": "f"],
+                ["id": "c2", "title": NSNull(), "updatedAt": "2026-11-10T08:00:00.000Z", "fishId": "f"],
+            ]
+        case "agent.messages":
+            return [
+                ["id": "m1", "role": "user", "content": worst ? String(repeating: "Which of my saves mention lamps? ", count: 8) : "Which saves mention lamps?"],
+                ["id": "m2", "role": "assistant", "content": worst ? String(repeating: "I found **12 Saves** about lamps, mostly from Instagram. ", count: 10) : "I found **12 Saves** about lamps."],
+            ]
+        case "agent.listAvailableModels":
+            return ["providers": [["provider": "anthropic", "ok": true, "models": [["id": "claude"]]]]]
+        default:
+            return nil
+        }
     }
 
     static func save(_ mode: FixtureProtocol.Mode) -> Save {

@@ -19,6 +19,8 @@ struct Save: Codable, Identifiable, Hashable {
     var folderIds: [String]
     var note: String?
     var rating: Int?
+    /// Pond versions before favorites omit it.
+    var favorite: Bool?
     var kind: String?
     var status: String
     var savedAt: Double
@@ -28,6 +30,7 @@ struct Save: Codable, Identifiable, Hashable {
 
     var savedDate: Date { Date(timeIntervalSince1970: savedAt / 1000) }
     var isVideo: Bool { kind == "video" }
+    var isFavorite: Bool { favorite ?? false }
 }
 
 struct LibraryInfo: Codable {
@@ -86,6 +89,7 @@ struct QueryRequest: Encodable {
         var folderIds: [String]?
         var uncategorized: Bool?
         var tag: String?
+        var inbox: String?
     }
 
     var query: JSONValue?
@@ -120,6 +124,15 @@ struct EnqueueResult: Decodable {
     var created: Bool
 }
 
+/// A compression job running on the Mac. Poll it until it leaves `running`.
+struct ConversionJob: Decodable {
+    var id: String
+    var status: String
+    var changed: Int
+    var skipped: Int
+    var error: String?
+}
+
 struct EditResult: Decodable {
     var changed: Int
 }
@@ -133,4 +146,18 @@ struct SaveFile: Identifiable, Hashable {
     var id: Int { index }
     var isVideo: Bool { contentType.hasPrefix("video/") }
     var isImage: Bool { contentType.hasPrefix("image/") }
+}
+
+struct RecentLibrary: Decodable, Identifiable, Hashable {
+    var path: String
+    var name: String
+    var available: Bool
+    var active: Bool
+    var id: String { path }
+}
+
+extension JSONValue: ExpressibleByStringLiteral, ExpressibleByBooleanLiteral, ExpressibleByIntegerLiteral {
+    init(stringLiteral value: String) { self = .string(value) }
+    init(booleanLiteral value: Bool) { self = .bool(value) }
+    init(integerLiteral value: Int) { self = .number(Double(value)) }
 }

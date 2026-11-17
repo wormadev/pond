@@ -14,6 +14,23 @@ actor ImageLoader {
         cache.setObject(ready, forKey: url as NSURL)
         return ready
     }
+
+    func forget(_ request: URLRequest) {
+        guard let url = request.url else { return }
+        cache.removeObject(forKey: url as NSURL)
+    }
+}
+
+extension PondAPI {
+    /// Drops cached copies of a Save's media after the Mac rewrote it.
+    func forgetMedia(of save: Save) async {
+        let requests = ["small", "medium", "large"].map { thumbRequest(id: save.id, size: $0) }
+            + (0..<max(save.media.files, 1)).map { fileRequest(id: save.id, index: $0) }
+        for request in requests {
+            session.configuration.urlCache?.removeCachedResponse(for: request)
+            await ImageLoader.shared.forget(request)
+        }
+    }
 }
 
 /// Loads an authenticated image and fades it in.

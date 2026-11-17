@@ -41,10 +41,17 @@ struct HomeScreen: View {
                         })
                         RowsGroup(title: "Sources", items: store.sources.map { (LibraryScope.source($0.source), "arrow.down.circle", $0.count) })
                         RowsGroup(title: "More", items: [
+                            (.inbox("review"), "tray", nil),
+                            (.inbox("snoozed"), "moon.zzz", nil),
                             (.untagged, "tag.slash", nil),
                             (.uncategorized, "folder.badge.questionmark", nil),
                             (.trash, "trash", info.counts.trashed),
                         ])
+                        RowSeparator()
+                        NavigationLink { AssistantScreen(store: store) } label: {
+                            ListRow(title: "Assistant", icon: "sparkles", showsChevron: true)
+                        }
+                        .buttonStyle(RowPressStyle())
                     }
                 } else {
                     HomeSkeleton()

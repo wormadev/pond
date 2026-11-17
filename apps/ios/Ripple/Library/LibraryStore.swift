@@ -9,6 +9,8 @@ enum LibraryScope: Hashable {
     case folder(LibraryFolder)
     case view(LibraryView)
     case source(String)
+    /// `review` or `snoozed`.
+    case inbox(String)
 
     var title: String {
         switch self {
@@ -20,6 +22,7 @@ enum LibraryScope: Hashable {
         case .folder(let folder): folder.name
         case .view(let view): view.name
         case .source(let source): source.capitalized
+        case .inbox(let state): state == "snoozed" ? "Snoozed" : "Inbox"
         }
     }
 
@@ -33,6 +36,7 @@ enum LibraryScope: Hashable {
         case .tag(let name): request.scope = .init(tag: name)
         case .folder(let folder): request.scope = .init(folderIds: [folder.id])
         case .source(let source): request.scope = .init(source: source)
+        case .inbox(let state): request.scope = .init(inbox: state)
         case .view(let view):
             request.query = view.query
             request.sortKey = view.sortKey
