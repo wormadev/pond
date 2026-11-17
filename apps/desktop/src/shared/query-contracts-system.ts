@@ -180,6 +180,15 @@ export interface ConnectStatus {
   online: boolean;
 }
 
+/** One signed-in session of the account; `current` marks this Mac. */
+export interface ConnectDevice {
+  kind: "mac" | "phone";
+  name: string;
+  signedInAt: number;
+  lastSeenAt: number;
+  current: boolean;
+}
+
 export interface SystemQueryResults {
   "watches.list": { watches: (WatchedAccount & { syncing: boolean })[] };
   "watches.resolve": { ok: false } | { ok: true; target: WatchTarget };
@@ -258,6 +267,7 @@ export interface SystemQueryResults {
   "apiTokens.create": { token: string; info: ApiTokenInfo };
   "apiTokens.revoke": { ok: boolean };
   "connect.status": ConnectStatus;
+  "connect.devices": { devices: ConnectDevice[] };
   "connect.signIn": ConnectStatus;
   "connect.signOut": ConnectStatus;
   "settings.getOnboarded": { onboarded: boolean };

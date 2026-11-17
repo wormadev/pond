@@ -53,6 +53,7 @@ export const queryOperationAccess = {
   "canvases.rename": "review",
   "canvases.update": "hidden",
   "clipboard.writeText": "review",
+  "connect.devices": "hidden",
   "connect.signIn": "hidden",
   "connect.signOut": "hidden",
   "connect.status": "hidden",

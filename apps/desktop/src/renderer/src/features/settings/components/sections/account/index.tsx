@@ -2,9 +2,11 @@ import { Button, Dialog, Settings } from "@pond/ui";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { THIS_DEVICE } from "@/shared/lib/platform";
+import { relativeTimeFromMs } from "@/shared/lib/relative-time";
 import { SignInDialog } from "./sign-in-dialog";
 
 const STATUS_KEY = ["connect-status"];
+const DEVICES_KEY = ["connect-devices"];
 
 export function AccountSection() {
   const client = useQueryClient();
@@ -15,8 +17,17 @@ export function AccountSection() {
     refetchInterval: (query) =>
       query.state.data?.email && !query.state.data.online ? 2000 : 15_000,
   });
-  const refresh = () => client.invalidateQueries({ queryKey: STATUS_KEY });
   const email = status.data?.email ?? null;
+  const devices = useQuery({
+    queryKey: DEVICES_KEY,
+    queryFn: () => window.pond.query("connect.devices", {}),
+    enabled: email !== null,
+    refetchInterval: 30_000,
+  });
+  const refresh = async () => {
+    await client.invalidateQueries({ queryKey: STATUS_KEY });
+    await client.invalidateQueries({ queryKey: DEVICES_KEY });
+  };
 
   return (
     <Settings.Page>
@@ -86,6 +97,39 @@ export function AccountSection() {
           </Settings.Item>
         </Settings.List>
       </Settings.Section>
+      {email ? (
+        <Settings.Section>
+          <Settings.SectionDetails>
+            <Settings.SectionTitle>Devices</Settings.SectionTitle>
+          </Settings.SectionDetails>
+          <Settings.List>
+            {devices.data?.devices.length ? (
+              devices.data.devices.map((device) => (
+                <Settings.Item key={`${device.kind}-${device.signedInAt}`}>
+                  <Settings.ItemDetails>
+                    <Settings.ItemTitle>{device.name}</Settings.ItemTitle>
+                    <Settings.ItemDescription>
+                      {device.current
+                        ? `This ${device.kind === "mac" ? "Mac" : "phone"}`
+                        : `${device.kind === "mac" ? "Mac" : "Phone"}, active ${relativeTimeFromMs(device.lastSeenAt)}`}
+                    </Settings.ItemDescription>
+                  </Settings.ItemDetails>
+                </Settings.Item>
+              ))
+            ) : (
+              <Settings.Item>
+                <Settings.ItemDetails>
+                  <Settings.ItemTitle>
+                    {devices.isPending
+                      ? "Loading devices"
+                      : "Couldn't load devices"}
+                  </Settings.ItemTitle>
+                </Settings.ItemDetails>
+              </Settings.Item>
+            )}
+          </Settings.List>
+        </Settings.Section>
+      ) : null}
       {dialog ? (
         <SignInDialog
           creating={dialog === "create"}

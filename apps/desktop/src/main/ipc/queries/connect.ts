@@ -1,5 +1,6 @@
 import { z } from "zod";
 import {
+  connectDevices,
   connectSignIn,
   connectSignOut,
   connectStatus,
@@ -8,6 +9,8 @@ import { type QueryHandlerMap, query } from "./params";
 
 export const connectQueries = {
   "connect.status": () => connectStatus(),
+
+  "connect.devices": () => connectDevices(),
 
   "connect.signIn": query(
     z.object({

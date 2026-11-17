@@ -324,6 +324,7 @@ export interface QueryInputs
   "apiTokens.create": { name: string; scopes: ApiTokenScope[] };
   "apiTokens.revoke": { id: string };
   "connect.status": EmptyInput;
+  "connect.devices": EmptyInput;
   "connect.signIn": { email: string; password: string; creating: boolean };
   "connect.signOut": EmptyInput;
   "settings.getOnboarded": EmptyInput;

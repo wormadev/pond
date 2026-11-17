@@ -8,7 +8,10 @@ import {
   CONNECT_SERVER,
   KEYCHAIN_CONNECT_SESSION,
 } from "../../shared/constants";
-import type { ConnectStatus } from "../../shared/query-contracts-system";
+import type {
+  ConnectDevice,
+  ConnectStatus,
+} from "../../shared/query-contracts-system";
 import { USER_ERROR_NAME, userError } from "../../shared/user-error";
 import { apiTokens } from "../http/api-tokens";
 import { deleteSecret, getSecret, setSecret } from "../keychain";
@@ -34,6 +37,17 @@ const MachinesSchema = z.object({
   machines: z.array(z.object({ id: z.uuid(), name: z.string() })),
 });
 const MachineSchema = z.object({ id: z.uuid() });
+const DevicesSchema = z.object({
+  devices: z.array(
+    z.object({
+      kind: z.enum(["mac", "phone"]),
+      name: z.string(),
+      signedInAt: z.number(),
+      lastSeenAt: z.number(),
+      current: z.boolean(),
+    }),
+  ),
+});
 
 /** Carries the service's own sentence to the screen, plus the status the caller branches on. */
 class ConnectError extends Error {
@@ -139,6 +153,12 @@ function start(session: Session): void {
 export async function connectStatus(): Promise<ConnectStatus> {
   const session = await readSession();
   return { email: session?.email ?? null, online: relay?.isOpen() ?? false };
+}
+
+export async function connectDevices(): Promise<{ devices: ConnectDevice[] }> {
+  const session = await readSession();
+  if (!session) return { devices: [] };
+  return call(DevicesSchema, "/v1/me", { token: session.token });
 }
 
 export async function startConnect(): Promise<void> {
