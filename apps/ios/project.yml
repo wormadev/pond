@@ -1,0 +1,80 @@
+name: Ripple
+options:
+  bundleIdPrefix: com.wormadev
+  deploymentTarget:
+    iOS: "18.0"
+  createIntermediateGroups: true
+settings:
+  base:
+    DEVELOPMENT_TEAM: 4BHH38RCA7
+    SWIFT_VERSION: "5.0"
+    MARKETING_VERSION: "0.1.0"
+    CURRENT_PROJECT_VERSION: "10"
+    CODE_SIGN_STYLE: Automatic
+targets:
+  Ripple:
+    type: application
+    platform: iOS
+    sources: [Ripple, Shared]
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.wormadev.ripple
+        TARGETED_DEVICE_FAMILY: "1"
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+    info:
+      path: Ripple/Info.plist
+      properties:
+        CFBundleDisplayName: Ripple
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        UILaunchScreen:
+          UIColorName: Background
+        UIAppFonts: [Inter.ttf]
+        UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
+        UIUserInterfaceStyle: Dark
+        ITSAppUsesNonExemptEncryption: false
+    entitlements:
+      path: Ripple/Ripple.entitlements
+      properties:
+        com.apple.security.application-groups: [group.com.wormadev.ripple]
+        keychain-access-groups: [$(AppIdentifierPrefix)com.wormadev.ripple.shared]
+    dependencies:
+      - target: RippleShare
+    scheme:
+      testTargets: [RippleTests]
+  RippleShare:
+    type: app-extension
+    platform: iOS
+    sources: [RippleShare, Shared]
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.wormadev.ripple.share
+        TARGETED_DEVICE_FAMILY: "1"
+    info:
+      path: RippleShare/Info.plist
+      properties:
+        CFBundleDisplayName: Save to Pond
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.share-services
+          NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).ShareViewController
+          NSExtensionAttributes:
+            NSExtensionActivationRule:
+              NSExtensionActivationSupportsWebURLWithMaxCount: 1
+              NSExtensionActivationSupportsText: true
+    entitlements:
+      path: RippleShare/RippleShare.entitlements
+      properties:
+        com.apple.security.application-groups: [group.com.wormadev.ripple]
+        keychain-access-groups: [$(AppIdentifierPrefix)com.wormadev.ripple.shared]
+  RippleTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources: [RippleTests]
+    dependencies:
+      - target: Ripple
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.wormadev.ripple.tests
+        GENERATE_INFOPLIST_FILE: YES

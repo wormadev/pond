@@ -1,0 +1,9 @@
+*.xcodeproj
+build/
+DerivedData/
+.DS_Store
+xcuserdata/
+Ripple/Info.plist
+RippleShare/Info.plist
+*.entitlements
+.snapshots/
