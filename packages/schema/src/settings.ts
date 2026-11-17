@@ -39,6 +39,7 @@ export const SETTINGS_SECTIONS: readonly SettingsSection[] = [
     label: "Local API",
     group: "general",
   },
+  { id: "account", path: "account", label: "Account", group: "general" },
   { id: "tags", path: "tags", label: "Tags", hidden: true, group: "library" },
   {
     id: "library",

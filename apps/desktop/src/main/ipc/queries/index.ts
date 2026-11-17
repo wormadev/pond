@@ -19,6 +19,7 @@ import { apiTokensQueries } from "./api-tokens";
 import { arenaLinkQueries } from "./arena-links";
 import { bulkQueries } from "./bulk";
 import { canvasesQueries } from "./canvases";
+import { connectQueries } from "./connect";
 import { conversionQueries } from "./conversion";
 import { downloaderQueries } from "./downloader";
 import { downloadsQueries } from "./downloads";
@@ -65,6 +66,7 @@ const queryRegistry = {
   ...arenaLinkQueries,
   ...settingsQueries,
   ...apiTokensQueries,
+  ...connectQueries,
   ...tagsQueries,
   ...tagGroupsQueries,
   ...savedViewsQueries,

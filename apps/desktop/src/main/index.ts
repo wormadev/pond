@@ -7,6 +7,7 @@ import log from "electron-log/main.js";
 import { DEFAULT_APP_ICON } from "../shared/app-icons";
 import { IPC, type RecentMenuEntry } from "../shared/constants";
 import type { ShortcutId } from "../shared/shortcuts";
+import { startConnect, stopConnect } from "./connect/session";
 import { fishMcp } from "./core/agent/fish-mcp/live";
 import { startAutoImport, stopAutoImport } from "./core/auto-import";
 import { captures } from "./core/captures";
@@ -437,6 +438,12 @@ async function postLaunchInit(): Promise<void> {
     log.error("[pond] http server failed to start", err);
   }
 
+  if (!process.env.POND_SANDBOX) {
+    void startConnect().catch((err) =>
+      log.warn("[pond connect] failed to start", err),
+    );
+  }
+
   try {
     nativeServer = await startNativeServer();
   } catch (err) {
@@ -705,6 +712,7 @@ async function shutdownForQuit(): Promise<void> {
   } catch (err) {
     log.warn("[pond] native host close failed", err);
   }
+  stopConnect();
   try {
     await withDeadline(runtimeControls.closeHttpServer(), SERVER_CLOSE_MS);
   } catch (err) {

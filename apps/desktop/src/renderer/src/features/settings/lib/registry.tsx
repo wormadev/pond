@@ -1,4 +1,5 @@
 import {
+  IconPhone as Account,
   IconPalette as Appearance,
   IconArchive as Backups,
   IconGlobe as Extension,
@@ -41,6 +42,7 @@ const ICONS = new Map<string, IconComponent>([
   ["shortcuts", Shortcuts],
   ["extension", Extension],
   ["local-api", LocalApi],
+  ["account", Account],
   ["tags", Tags],
   ["library", Library],
   ["health", Health],
@@ -82,6 +84,7 @@ const BESPOKE_SECTION_IDS = new Set([
   "personalization",
   "mcp",
   "local-api",
+  "account",
 ]);
 
 export function isBespokeSection(section: SectionDef): boolean {

@@ -174,6 +174,12 @@ type Attachment = AttachmentIdentity &
       }
   );
 
+/** `email` is null when this Mac is signed out; `online` says whether the relay socket is open. */
+export interface ConnectStatus {
+  email: string | null;
+  online: boolean;
+}
+
 export interface SystemQueryResults {
   "watches.list": { watches: (WatchedAccount & { syncing: boolean })[] };
   "watches.resolve": { ok: false } | { ok: true; target: WatchTarget };
@@ -251,6 +257,9 @@ export interface SystemQueryResults {
   "apiTokens.list": { tokens: ApiTokenInfo[] };
   "apiTokens.create": { token: string; info: ApiTokenInfo };
   "apiTokens.revoke": { ok: boolean };
+  "connect.status": ConnectStatus;
+  "connect.signIn": ConnectStatus;
+  "connect.signOut": ConnectStatus;
   "settings.getOnboarded": { onboarded: boolean };
   "settings.setOnboarded": OkResult;
   "autoImport.status": Prefs["autoImport"] & {

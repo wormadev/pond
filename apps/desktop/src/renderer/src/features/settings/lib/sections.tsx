@@ -1,5 +1,6 @@
 import { EXTERNAL_SOURCE_IDS } from "@pond/schema/sources";
 import type { SectionConfig } from "@/features/settings/components/engine";
+import { accountSection } from "@/features/settings/lib/config-account";
 import { appearanceSection } from "@/features/settings/lib/config-appearance";
 import { backupsSection } from "@/features/settings/lib/config-backups";
 import { extensionSection } from "@/features/settings/lib/config-extension";
@@ -50,6 +51,11 @@ const LocalApiSection = lazyWithPreload(() =>
     (m) => m.LocalApiSection,
   ),
 );
+const AccountSection = lazyWithPreload(() =>
+  import("@/features/settings/components/sections/account").then(
+    (m) => m.AccountSection,
+  ),
+);
 const ShortcutSettings = lazyWithPreload(() =>
   import("@/features/shortcuts").then((m) => m.ShortcutSettings),
 );
@@ -61,6 +67,7 @@ export const SECTION_PRELOADS = [
   PersonalizationSection.preload,
   McpSection.preload,
   LocalApiSection.preload,
+  AccountSection.preload,
   ShortcutSettings.preload,
   ScheduleSection.preload,
 ];
@@ -71,6 +78,7 @@ export const SECTION_CONFIGS = new Map<string, SectionConfig>([
   ["appearance", appearanceSection],
   ["extension", extensionSection],
   ["local-api", { ...localApiSection, component: LocalApiSection }],
+  ["account", { ...accountSection, component: AccountSection }],
   [
     "shortcuts",
     {
