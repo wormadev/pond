@@ -211,6 +211,31 @@ describe("machines", () => {
     expect(refused.status).toBe(426);
   });
 
+  it("lists only the account's own devices and marks the caller", async () => {
+    const mac = await account("devices@example.com");
+    await account("stranger@example.com", "phone");
+    ip += 1;
+    await call("/v1/login", {
+      method: "POST",
+      body: {
+        email: "devices@example.com",
+        key: key("a"),
+        device: { kind: "phone", name: "Phone" },
+      },
+    });
+    const me = await call("/v1/me", { token: mac });
+    const devices = me.data?.devices as {
+      kind: string;
+      name: string;
+      current: boolean;
+    }[];
+    expect(devices.map((device) => [device.kind, device.current])).toEqual([
+      ["mac", true],
+      ["phone", false],
+    ]);
+    expect(JSON.stringify(devices)).not.toContain("token");
+  });
+
   it("accepts the Mac's token as a socket subprotocol", async () => {
     const mac = await account("protocol@example.com");
     const linked = await call("/v1/machines", {

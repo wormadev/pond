@@ -72,7 +72,28 @@ async function route(request: Request, env: Env): Promise<Response> {
         online: await env.RELAY.getByName(machine.id).isOnline(),
       })),
     );
-    return ok({ email: user?.email, machines: withStatus });
+    const devices = await env.DB.prepare(
+      "SELECT token_hash, kind, name, created_at, last_seen_at FROM sessions WHERE user_id = ? ORDER BY created_at",
+    )
+      .bind(session.userId)
+      .all<{
+        token_hash: string;
+        kind: "mac" | "phone";
+        name: string;
+        created_at: number;
+        last_seen_at: number;
+      }>();
+    return ok({
+      email: user?.email,
+      machines: withStatus,
+      devices: devices.results.map((device) => ({
+        kind: device.kind,
+        name: device.name,
+        signedInAt: device.created_at,
+        lastSeenAt: device.last_seen_at,
+        current: device.token_hash === session.tokenHash,
+      })),
+    });
   }
 
   if (method === "POST" && path === "/v1/machines") {

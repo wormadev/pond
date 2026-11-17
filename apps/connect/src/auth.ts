@@ -106,6 +106,8 @@ export async function signIn(
 }
 
 const tokenProtocolPrefix = "bearer.";
+/** Device lists only need a rough time, so most requests skip the write. */
+const SEEN_EVERY_MS = 5 * 60_000;
 
 export function bearer(request: Request): string | null {
   const header = request.headers.get("authorization") ?? "";
@@ -129,11 +131,19 @@ export async function requireSession(
   if (!token) throw new HttpError(401, "unauthorized", "Sign in to continue.");
   const tokenHash = await sha256(token);
   const row = await env.DB.prepare(
-    "SELECT user_id, kind FROM sessions WHERE token_hash = ?",
+    "SELECT user_id, kind, last_seen_at FROM sessions WHERE token_hash = ?",
   )
     .bind(tokenHash)
-    .first<{ user_id: string; kind: "mac" | "phone" }>();
+    .first<{ user_id: string; kind: "mac" | "phone"; last_seen_at: number }>();
   if (!row) throw new HttpError(401, "unauthorized", "Sign in to continue.");
+  const now = Date.now();
+  if (now - row.last_seen_at > SEEN_EVERY_MS) {
+    await env.DB.prepare(
+      "UPDATE sessions SET last_seen_at = ? WHERE token_hash = ?",
+    )
+      .bind(now, tokenHash)
+      .run();
+  }
   return { userId: row.user_id, kind: row.kind, tokenHash };
 }
 
