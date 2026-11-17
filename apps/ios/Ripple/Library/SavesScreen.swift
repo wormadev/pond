@@ -30,13 +30,8 @@ struct SavesScreen: View {
     private var isPushed: Bool { !isSearch && list.scope != .all }
     private var isIdle: Bool { isSearch && list.keywords.trimmingCharacters(in: .whitespaces).isEmpty }
 
-    // Before iOS 26 the search field lives in the navigation bar, so Search keeps it.
-    private var hidesNavigationBar: Bool {
-        if isPushed { return false }
-        guard isSearch else { return true }
-        if #available(iOS 26, *) { return true }
-        return false
-    }
+    // Search keeps the navigation bar: iOS 27 drops the search field when the bar is hidden.
+    private var hidesNavigationBar: Bool { !isPushed && !isSearch }
 
     private var content: some View {
         ScrollView {
