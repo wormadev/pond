@@ -1,5 +1,5 @@
 import { Button } from "@pond/ui";
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   FolderEmpty,
   InboxEmpty,
@@ -24,6 +24,7 @@ import { useLibraryNav } from "@/features/library/state/library-chrome";
 import { resetFilters } from "@/features/library/state/view-store";
 import {
   clearSaveSelection,
+  createSelectionReconciler,
   isLibraryBackgroundTarget,
   libraryViewContext,
   SaveCollectionContextMenu,
@@ -33,10 +34,12 @@ import { resultNavigation } from "@/features/saves/navigation";
 import { useSavePaging } from "@/features/saves/pool";
 import { MatchesEmpty } from "@/shared/components/matches-empty";
 import { buildEmptyGalleryMenu } from "./empty-gallery-menu";
+import { importFolderFor } from "./import-folder";
 
 function LibraryEmptyState({
   mode,
   navKind,
+  folderId,
   hasActiveSearch,
   hasActiveFilter,
   libraryTotal,
@@ -44,6 +47,7 @@ function LibraryEmptyState({
 }: {
   mode: ReturnType<typeof useLibraryState>["mode"];
   navKind: ReturnType<typeof useLibraryNav>["kind"];
+  folderId: string | undefined;
   hasActiveSearch: boolean;
   hasActiveFilter: boolean;
   libraryTotal: number;
@@ -57,7 +61,8 @@ function LibraryEmptyState({
     libraryTotal,
   });
   if (kind === "trash") return <TrashEmpty />;
-  if (kind === "folder") return <FolderEmpty downloading={downloading} />;
+  if (kind === "folder")
+    return <FolderEmpty folderId={folderId} downloading={downloading} />;
   if (kind === "library") return <LibraryEmpty />;
   if (kind === "uncategorized") return <UncategorizedEmpty />;
   if (kind === "inbox") return <InboxEmpty />;
@@ -77,6 +82,7 @@ export function LibraryView() {
     data.filteredIds,
     data.mode,
     data.sourceFilter,
+    importFolderFor({ mode: data.mode, nav, folders }),
   );
   useGridHotkeys(data.filteredIds);
 
@@ -94,6 +100,7 @@ export function LibraryView() {
   // A new scope clears its page before the first answer arrives. Publishing
   // that empty list under the new key makes an open preview treat the Save as gone.
   const publishedKey = useRef<string | null>(null);
+  const [reconcileSelection] = useState(createSelectionReconciler);
 
   useEffect(() => {
     const key = data.paging.queryKey;
@@ -113,6 +120,12 @@ export function LibraryView() {
       allIds: data.paging.allIds,
       loadMore: data.paging.loadMore,
     });
+    /** After setSource, so an open preview has already followed a departed Save to its neighbor. */
+    reconcileSelection({
+      key,
+      ids: data.filteredIds,
+      settled: !data.paging.loading,
+    });
   }, [
     data.filteredIds,
     data.mode,
@@ -123,6 +136,7 @@ export function LibraryView() {
     data.paging.settledEmpty,
     data.paging.total,
     data.paging.loadedIds,
+    reconcileSelection,
   ]);
 
   return (
@@ -166,6 +180,7 @@ export function LibraryView() {
           <LibraryEmptyState
             mode={data.mode}
             navKind={nav.kind}
+            folderId={nav.kind === "folder" ? nav.id : undefined}
             hasActiveSearch={data.hasActiveSearch}
             hasActiveFilter={data.hasActiveFilter}
             libraryTotal={paging.total}
